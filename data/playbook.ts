@@ -58,13 +58,16 @@ export const NEVER_SAY: string[] = [
   "Property valuations or price predictions: the advisor never values a property. This is a red line in code.",
   "Lead volumes, buyer numbers or a launch date: pre-launch, nothing has been measured with the public. Say \"at launch\" and \"in the book on day one\".",
   "\"An eXp platform\": Nostoi is built and owned by Custom AI Solutions (Pty) Ltd. eXp is the launch inventory partner.",
+  "\"The Competition Commission ordered Prop Data to give Nostoi your listings\" or \"Nostoi has a right to your feed\": the remedy is triggered by the agency's own instruction; Nostoi is the recipient, not the right-holder.",
+  "\"Nostoi is Commission-approved\" or \"the Commission requires you to list on Nostoi\": no approval or registration exists and no agency is obliged to feed any platform.",
+  "\"Prop Data or the portals are acting illegally\" or \"the remedy is permanent\": say only what is published; the remedies run to about July 2027 and their current terms are being confirmed.",
 ];
 
 export const PORTAL_CONTEXT = {
   title: "Property24 is everyone's cost line; Private Property is some of their investment",
   facts: [
     "Property24 is wholly owned by Naspers (Media24). Nobody on this list holds a stake in it, and the resentment is on record: Herschel Jawitz called its increases \"way in excess of inflation\", a 2019 restructure handed some agencies a near-50% hike, and the Competition Commission's 2023 Online Intermediation Platforms inquiry found its fee increases exorbitant.",
-    "The Commission ordered Property24 and Private Property to stop charging incoming-feed fees (about R500 per office per month), to end multi-year contracts with large agencies, and ordered Prop Data, Property24 and Private Property to provide interoperability at no fee so agents can feed listings to other platforms. Check with counsel whether that remedy is in force and whether Nostoi qualifies; it may be the key to the Prop Data feed.",
+    "The Commission ordered Property24 and Private Property to stop charging incoming-feed fees (about R500 per office per month) and to end multi-year contracts with large agencies, and required Prop Data, PropCtrl and Fusion to provide API feed-out to other platforms at no fee, on the agency's request. Six opinions agree it is in force on the published record until about July 2027, that the agency holds the trigger, and that Nostoi's eligibility is credible but unconfirmed. See the legal position below before quoting it.",
     "Private Property is where the vested interests sit. REBOSA set up the Estate Agents Property Portal Company so national groups could hold about 13% of it; REBOSA's leadership has included Andrew Golding and Samuel Seeff, and Adrian Goslett (RE/MAX SA) chairs it now. The Commission told REBOSA to stop backing Private Property as the preferred platform and recommended the large agencies divest; whether they have is not confirmed.",
     "BetterHome Group (BetterBond) has been Private Property's majority owner since 2023. BetterHome is a preference shareholder in RE/MAX SA, Chas Everitt and Tyson Properties, and took equity in Just Property in 2024. ooba, another Private Property shareholder, has Andrew Golding on its board.",
   ],
@@ -72,12 +75,14 @@ export const PORTAL_CONTEXT = {
     "Name Property24's cost openly; it is a shared grievance and the Commission's findings let you cite a regulator rather than your own frustration.",
     "Never position Nostoi against Private Property. For Pam Golding, Seeff, the RE/MAX offices, Chas Everitt, Tyson and Just Property that would touch their own or their funder's investment. \"Advisor, not portal; one more destination\" is the true and safe frame.",
     "Do not promise that Nostoi will cut their Property24 bill. It changes where a buyer can start; whether they cut spend elsewhere is their call.",
+    "Frame the feed as the agency exercising its own protected right, never as Nostoi versus Prop Data or the portals. Never say a portal or Prop Data is acting illegally.",
   ],
   phrases: [
     { when: "Opening a call with any principal", line: "You already pay Property24 more every year for the same leads. Nostoi is not another portal asking for a subscription: it is an advisor that presents your listings to buyers on evidence, and it joins through the feed you already run." },
     { when: "An agency with a Private Property or BetterHome connection", line: "Nostoi does not compete with Private Property. It is an advisor that reads the whole book, not a classifieds site. Where it changes the picture is the assumption that a buyer's first stop has to be Property24." },
     { when: "When they ask what it costs to be seen", line: "Nothing per listing, and no tier decides who gets seen. Ordering is newest-first within what the buyer asked for; paid Spotlights sit in their own labelled panel and never reach the advisor." },
-    { when: "When they raise the feed", line: "The Competition Commission ordered Prop Data and the portals to provide interoperability at no fee so your listings can reach other platforms. We are one of those platforms, and we will do the technical work." },
+    { when: "When they raise the feed (Prop Data, Fusion or PropCtrl agency)", line: "Under the Competition Commission's 2023 remedies your agency can direct your syndication provider to feed your listings to other platforms at no fee and without conditions. If you sign our participation mandate, we complete the integration on our side and handle the request to your provider with you. We are not asking you to stop feeding any portal." },
+    { when: "When they ask whether Nostoi is covered by the remedy", line: "Nostoi is a South African online property-intermediation platform: agencies supply listings, buyers search and review them through an AI advisor, and every enquiry goes to the listing agent. We consider that a credible fit with the Commission's definition; the Commission has not ruled on Nostoi individually, and we have asked it to confirm." },
     { when: "In writing, after the call", line: "Two things in writing: enquiries go only to your own agent, and no payment, brand or portal relationship changes what a buyer sees outside a labelled Sponsored panel." },
   ],
 };
@@ -108,14 +113,33 @@ export const DECISION_MAP: DecisionRow[] = [
 ];
 
 export const FEED_GATE = {
-  title: "The one practical gate: which feed vendor they use",
-  body: "Nostoi ingests a daily snapshot from PropCon at launch. An agency on PropCon can be live at launch with a principal's sign-off and a request to PropCon to add Nostoi as a destination. An agency on another vendor (Prop Data, Entegral, Fusion, Flex, an in-house CRM) can sign the agreement now and goes live when that integration exists; agencies not on PropCon are on the launch list as a known gap. Find the vendor before the first call: look for a \"powered by\" credit in the agency website footer, the URL pattern of their listing pages, or ask their marketing person outright.",
+  title: "The practical gate: which feed vendor they use, and who pulls the trigger",
+  body: "Nostoi ingests a daily snapshot from PropCon at launch, so a PropCon agency can be live at launch on a principal's sign-off. Most of the big Cape Town groups syndicate through Prop Data instead, and here the Competition Commission's 2023 remedies matter: Prop Data (and Property24's PropCtrl and Private Property's Fusion) must offer API feed-out to other online property classified platforms at no cost and without conditions, and must let each agency select which integrated platforms receive its listings. The trigger is the agency's own election or written instruction; Nostoi has no right to pull a feed itself, and must complete the API integration on its side first. So the ask to a Prop Data agency is a signed instruction, not a favour. Find the vendor before the first call: a \"powered by\" credit in the website footer, the URL pattern of their listing pages, or ask their marketing person outright.",
+};
+
+export const LEGAL_POSITION = {
+  title: "What six legal opinions agree on about the Commission's remedies",
+  asOf: "29 September 2026",
+  points: [
+    "The remedies are binding Commission decisions under section 43D of the Competition Act, published 28 to 31 July 2023, with a twelve-month implementation deadline (late July 2024) and a four-year term running to about July 2027. No public variation, appeal or replacement order was found, but none of the opinions could certify the current operative terms; implementation is described by the Commission as ongoing and partial for Private Property.",
+    "Annexure 10 requires Prop Data to feed out listings to other online property classified platforms by API at no cost to agents or platforms, to place no conditions on API access, to give its users a way to select integrated destinations, and to notify agencies of that functionality in writing. Property24 (PropCtrl) and Private Property (Fusion) carry parallel feed-out duties, and the two portals had to stop charging for incoming feeds.",
+    "The right sits with the agency, not with Nostoi. The agency elects Nostoi in its syndication settings or instructs its provider in writing; Nostoi completes the integration and is the authorised recipient. Get the instruction from the actual account-holding entity: a franchise brand's nod does not cover each independently owned office.",
+    "Nostoi's fit with \"online property classified platforms\" (a platform that lets agents list and lets consumers search and review listings from a wide variety of agents) is credible but has not been ruled on. Describe Nostoi as a South African online property-intermediation platform providing AI-assisted property search, matching and introductions; make the listing agency visible on every home; never call Nostoi Commission-approved.",
+    "If a provider refuses, delays, charges or disputes eligibility: get the refusal in writing, then send a compliance enquiry with the agency's instruction attached to inquiryremedialaction@compcom.co.za. The schedule provides for Commission engagement, a ten-business-day compliance notice and a Tribunal application; Nostoi cannot issue that notice itself. The Commission has reported that MyProperty and Property Central obtained listings through these remedies.",
+    "Nostoi's own terms must not recreate what the Commission condemned: non-exclusive participation, short terminable terms, no incoming-feed fee, no paid ranking, no restriction on feeding rivals. Disclose the eXp relationship and commit in the agreement to no preferential treatment by network, no diversion of another agency's enquiries, and no use of participation or lead data for eXp recruiting, backed by access controls.",
+  ],
+  nextSteps: [
+    "Add a stand-alone Listing Feed Authorisation and Direction to the Platform Participation Agreement (the agency \"instructs and authorises\" its provider; non-exclusive; revocable; Nostoi does the integration and charges nothing to receive).",
+    "Write to the Commission for written confirmation of the current status of the Prop Data, PropCtrl and Fusion remedies and of Nostoi's eligibility; do not make an unqualified public claim until that reply is in hand.",
+    "Request Prop Data's API documentation in writing, describing Nostoi as an online property-intermediation platform that receives agency listings for consumer search and review.",
+    "Start with one willing Prop Data agency: signed direction, joint request to Prop Data, ten-business-day response asked for, every reply kept.",
+  ],
 };
 
 export const THE_ASK: string[] = [
   "A 20-minute call with the owner or principal, with a live walkthrough of the working platform.",
   "The principal signs the Platform Participation Agreement v5 from a single-use invitation, signed in.",
-  "If they are on PropCon: Nostoi asks PropCon to add the agency's feed as a destination. If not: the agency registers interest and goes live when its vendor is connected.",
+  "If they are on PropCon: Nostoi asks PropCon to add the agency's feed as a destination. If they are on Prop Data, Fusion or PropCtrl: the principal signs the Listing Feed Authorisation and Direction and sends the matching instruction to the provider; Nostoi sends the joint request and does the integration. Any other vendor: register interest and go live when connected.",
   "The principal names one designated administrator and invites agents from the dashboard.",
   "Their agents get the listing-health console and coaching straight away, and the office gets the High Tech | High Touch webinar at no cost.",
 ];
@@ -146,6 +170,10 @@ export const OBJECTIONS: Objection[] = [
   {
     q: "What does it cost us?",
     a: "Office participation is by a written agreement with each agency, and we discuss terms directly with you. On the agent side, Premium membership is optional at R350 a month and quality-gated, and Spotlights are optional labelled sponsored placement bought with credits. Seller introductions are free at launch. Nothing paid changes what a buyer sees outside a labelled Sponsored panel.",
+  },
+  {
+    q: "We're on Prop Data. Getting a new feed out of them is a mission.",
+    a: "It used to be. Since the Competition Commission's 2023 remedies Prop Data must feed your listings out to other online property platforms by API at no cost and without conditions, and must let you choose which integrated platforms receive them. The request has to come from you, the account holder, which is why our agreement includes a one-page feed instruction you sign and we send to Prop Data with you. We do the integration on our side. If they stall, we have the Commission's compliance route, but in practice a clear written instruction from the client is what moves it.",
   },
   {
     q: "Where are the buyers? You haven't launched.",
@@ -269,6 +297,25 @@ The two things I'll repeat in writing: eXp has no ranking, badging or advisory p
 Steve
 {{sender}}
 {{email}}`,
+  },
+  {
+    id: "propdata-instruction",
+    name: "Agency instruction to Prop Data (for the principal to send)",
+    channel: "Email",
+    when: "After the agreement is signed, for a Prop Data, Fusion or PropCtrl agency; the principal sends it, Nostoi copied",
+    subject: "Instruction to add Nostoi as a feed destination for {{agency}}",
+    body: `Dear Prop Data team,
+
+{{agency}} ({{office}}) instructs and authorises Prop Data to make our authorised public-marketing listings, with subsequent updates and withdrawals, available to Custom AI Solutions (Pty) Ltd, operating Nostoi, through the API feed-out functionality, and elects Nostoi as a feed destination wherever your selection functionality permits.
+
+We make this request under the interoperability functionality required by the Competition Commission's Online Intermediation Platforms Market Inquiry remedial actions (Annexure 10), without an interoperability or feed-out fee. This instruction is non-exclusive, covers only listings we are authorised to syndicate, and does not change any other destination we feed.
+
+Nostoi's technical contact is copied and will complete the integration on its side. Please confirm the steps and timetable on your side within ten business days, and if anything prevents you from enabling the feed, please set out the reason and the term you rely on in writing.
+
+Kind regards,
+{{principal}}
+Principal, {{agency}}
+Prop Data account: [account number]`,
   },
   {
     id: "propcon-request",

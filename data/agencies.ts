@@ -163,7 +163,7 @@ export const AGENCIES: Agency[] = [
       firstContact: "Sandy Soller (CEO) by email for a walkthrough; in parallel Nancy Todd at Constantia as the Southern Suburbs champion.",
       warmPaths: ["Rawson-trained agents now at eXp", "Rondebosch is next door to Kenilworth and Claremont agencies you already know"],
     },
-    portal: { interest: "Rawson leadership has been part of REBOSA's portal partnership with Private Property. No interest in Property24.", phrase: "Every rand of the Property24 increase comes off your franchisees' margin. Nostoi adds a buyer surface without adding a subscription, and the Competition Commission's interoperability ruling means your feed can reach it at no charge." },
+    portal: { interest: "Rawson leadership has been part of REBOSA's portal partnership with Private Property. No interest in Property24.", phrase: "Every rand of the Property24 increase comes off your franchisees' margin. Nostoi adds a buyer surface without adding a subscription, and under the Competition Commission's 2023 remedies you can direct Prop Data to feed your listings to it at no fee." },
     sources: [
       { label: "About Rawson", url: "https://rawson.co.za/about" },
       { label: "Contact", url: "https://rawson.co.za/contact" },
