@@ -60,6 +60,28 @@ export const NEVER_SAY: string[] = [
   "\"An eXp platform\": Nostoi is built and owned by Custom AI Solutions (Pty) Ltd. eXp is the launch inventory partner.",
 ];
 
+export const PORTAL_CONTEXT = {
+  title: "Property24 is everyone's cost line; Private Property is some of their investment",
+  facts: [
+    "Property24 is wholly owned by Naspers (Media24). Nobody on this list holds a stake in it, and the resentment is on record: Herschel Jawitz called its increases \"way in excess of inflation\", a 2019 restructure handed some agencies a near-50% hike, and the Competition Commission's 2023 Online Intermediation Platforms inquiry found its fee increases exorbitant.",
+    "The Commission ordered Property24 and Private Property to stop charging incoming-feed fees (about R500 per office per month), to end multi-year contracts with large agencies, and ordered Prop Data, Property24 and Private Property to provide interoperability at no fee so agents can feed listings to other platforms. Check with counsel whether that remedy is in force and whether Nostoi qualifies; it may be the key to the Prop Data feed.",
+    "Private Property is where the vested interests sit. REBOSA set up the Estate Agents Property Portal Company so national groups could hold about 13% of it; REBOSA's leadership has included Andrew Golding and Samuel Seeff, and Adrian Goslett (RE/MAX SA) chairs it now. The Commission told REBOSA to stop backing Private Property as the preferred platform and recommended the large agencies divest; whether they have is not confirmed.",
+    "BetterHome Group (BetterBond) has been Private Property's majority owner since 2023. BetterHome is a preference shareholder in RE/MAX SA, Chas Everitt and Tyson Properties, and took equity in Just Property in 2024. ooba, another Private Property shareholder, has Andrew Golding on its board.",
+  ],
+  rules: [
+    "Name Property24's cost openly; it is a shared grievance and the Commission's findings let you cite a regulator rather than your own frustration.",
+    "Never position Nostoi against Private Property. For Pam Golding, Seeff, the RE/MAX offices, Chas Everitt, Tyson and Just Property that would touch their own or their funder's investment. \"Advisor, not portal; one more destination\" is the true and safe frame.",
+    "Do not promise that Nostoi will cut their Property24 bill. It changes where a buyer can start; whether they cut spend elsewhere is their call.",
+  ],
+  phrases: [
+    { when: "Opening a call with any principal", line: "You already pay Property24 more every year for the same leads. Nostoi is not another portal asking for a subscription: it is an advisor that presents your listings to buyers on evidence, and it joins through the feed you already run." },
+    { when: "An agency with a Private Property or BetterHome connection", line: "Nostoi does not compete with Private Property. It is an advisor that reads the whole book, not a classifieds site. Where it changes the picture is the assumption that a buyer's first stop has to be Property24." },
+    { when: "When they ask what it costs to be seen", line: "Nothing per listing, and no tier decides who gets seen. Ordering is newest-first within what the buyer asked for; paid Spotlights sit in their own labelled panel and never reach the advisor." },
+    { when: "When they raise the feed", line: "The Competition Commission ordered Prop Data and the portals to provide interoperability at no fee so your listings can reach other platforms. We are one of those platforms, and we will do the technical work." },
+    { when: "In writing, after the call", line: "Two things in writing: enquiries go only to your own agent, and no payment, brand or portal relationship changes what a buyer sees outside a labelled Sponsored panel." },
+  ],
+};
+
 export interface DecisionRow { type: string; who: string; how: string }
 
 export const DECISION_MAP: DecisionRow[] = [
