@@ -1,0 +1,759 @@
+<title>Agent Outreach Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one working column. A day bar on top, four tabs, and cards grouped by the action each agent needs today. */
+:root {
+  --bg: #EDF0EB;
+  --surface: #FAFBF8;
+  --ink: #17221F;
+  --muted: #5A6963;
+  --line: #D3DBD4;
+  --accent: #1D6A56;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #DAEAE2;
+  --due: #A85C0A;
+  --due-soft: #F5E6D1;
+  --warn: #9A2F2F;
+  --warn-soft: #F4DDDB;
+  --ok: #2A7640;
+  --ok-soft: #DCEEDF;
+  --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1513; --surface: #17201C; --ink: #E3EBE6; --muted: #98A8A1; --line: #2A3632;
+    --accent: #62C1A1; --accent-ink: #0C1411; --accent-soft: #1D3A30;
+    --due: #E9A55C; --due-soft: #392917; --warn: #EA8E87; --warn-soft: #3A1E1C;
+    --ok: #7CCB8F; --ok-soft: #1C3423;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1513; --surface: #17201C; --ink: #E3EBE6; --muted: #98A8A1; --line: #2A3632;
+  --accent: #62C1A1; --accent-ink: #0C1411; --accent-soft: #1D3A30;
+  --due: #E9A55C; --due-soft: #392917; --warn: #EA8E87; --warn-soft: #3A1E1C;
+  --ok: #7CCB8F; --ok-soft: #1C3423;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 860px; margin: 0 auto; padding-inline: 16px; padding-block: 0 64px; }
+a { color: var(--accent); }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.daybar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.daybar-inner { max-width: 860px; margin: 0 auto; padding-inline: 16px; padding-block: 14px 0; display: grid; gap: 10px; }
+.titlerow { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; }
+.date { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.85rem; color: var(--muted); }
+.stats b { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 600; }
+.stats .hot b { color: var(--due); }
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.tab { border: 0; background: none; padding: 8px 12px 10px; cursor: pointer; color: var(--muted); font-weight: 500; border-bottom: 2px solid transparent; white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+section.panel { padding-block: 20px 0; display: grid; gap: 22px; }
+.group { display: grid; gap: 10px; }
+.group-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.group-head h2 { font-size: 1rem; font-weight: 600; }
+.group-head .count { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+.group-head p { margin: 0; flex-basis: 100%; font-size: 0.85rem; color: var(--muted); max-width: 65ch; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.card-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+.who { min-width: 0; }
+.who h3 { font-size: 1.02rem; font-weight: 600; }
+.meta { font-size: 0.84rem; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.chip.c-due { background: var(--due-soft); color: var(--due); }
+.chip.c-warn { background: var(--warn-soft); color: var(--warn); }
+.chip.c-ok { background: var(--ok-soft); color: var(--ok); }
+.chip.c-plain { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+.hook { font-size: 0.88rem; margin: 0; max-width: 70ch; }
+.hook::before { content: "Hook  "; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+.links { display: flex; flex-wrap: wrap; gap: 6px; }
+.links a, .plat { font-size: 0.82rem; text-decoration: none; padding: 4px 9px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: var(--bg); display: inline-flex; gap: 6px; align-items: center; }
+.links a:hover { border-color: var(--accent); }
+.plat { cursor: pointer; }
+.plat[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.plat[aria-pressed="true"]::before { content: "✓"; }
+.step { font-size: 0.86rem; color: var(--muted); margin: 0; max-width: 70ch; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 7px 12px; border-radius: 7px; cursor: pointer; font-weight: 500; font-size: 0.88rem; }
+.btn:hover { border-color: var(--ink); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.quiet { border-color: transparent; background: none; color: var(--muted); padding-inline: 6px; }
+.btn.quiet:hover { color: var(--ink); }
+.btn.danger { color: var(--warn); }
+.btn[disabled] { opacity: 0.55; cursor: default; }
+textarea, input[type="text"], input[type="url"], input[type="search"], select { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; }
+textarea { min-height: 120px; resize: vertical; line-height: 1.45; }
+textarea.short { min-height: 70px; }
+label.f { display: grid; gap: 4px; font-size: 0.8rem; color: var(--muted); min-width: 0; }
+.note { font-size: 0.82rem; color: var(--muted); margin: 0; }
+.note.warn { color: var(--warn); }
+.drafts { display: grid; gap: 8px; }
+.opt { border: 1px dashed var(--line); border-radius: 7px; padding: 8px 10px; display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
+.opt p { margin: 0; font-size: 0.9rem; min-width: 0; }
+.drop { border: 1px dashed var(--line); border-radius: 7px; padding: 10px; display: grid; gap: 8px; }
+.drop input[type="file"] { font-size: 0.82rem; max-width: 100%; }
+
+.empty { border: 1px dashed var(--line); border-radius: 10px; padding: 22px; text-align: left; color: var(--muted); display: grid; gap: 6px; }
+.empty strong { color: var(--ink); font-weight: 600; }
+
+.filters { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; }
+@media (max-width: 560px) { .filters { grid-template-columns: 1fr 1fr; } .filters .q { grid-column: 1 / -1; } }
+.plist { display: grid; gap: 6px; }
+.prow { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.prow > button { width: 100%; text-align: left; background: none; border: 0; padding: 10px 12px; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; }
+.prow .nm { font-weight: 600; }
+.prow .st { font-size: 0.8rem; text-align: right; color: var(--muted); font-family: var(--mono); }
+.prow .ds { grid-column: 1 / -1; font-size: 0.82rem; color: var(--muted); }
+.pdetail { border-top: 1px solid var(--line); padding: 12px; display: grid; gap: 10px; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; font-size: 0.86rem; margin: 0; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+
+.addform { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.addform .full { grid-column: 1 / -1; }
+@media (max-width: 560px) { .addform { grid-template-columns: 1fr; } }
+
+.script { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; }
+.script h3 { font-size: 0.95rem; font-weight: 600; }
+.script pre { margin: 0; white-space: pre-wrap; font-family: var(--body); font-size: 0.9rem; background: var(--bg); border-radius: 7px; padding: 10px 12px; }
+.script .when { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .cols { grid-template-columns: 1fr; } }
+
+.rules { display: grid; gap: 12px; counter-reset: rule; max-width: 70ch; }
+.rule { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.rule h3 { font-size: 0.98rem; font-weight: 600; margin-bottom: 4px; }
+.rule p, .rule ul { margin: 0; font-size: 0.9rem; }
+.rule ul { padding-left: 18px; display: grid; gap: 3px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 0.88rem; z-index: 10; }
+@media (prefers-reduced-motion: no-preference) { .card, .prow { transition: border-color .15s; } }
+</style>
+
+<header class="daybar">
+  <div class="daybar-inner">
+    <div class="titlerow">
+      <h1>Agent Outreach Desk</h1>
+      <span class="date" id="today-label"></span>
+    </div>
+    <div class="stats" id="stats"><span>Loading your prospects…</span></div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-act="tab" data-tab="today" aria-selected="true" id="tab-today">Today</button>
+      <button class="tab" role="tab" data-act="tab" data-tab="prospects" aria-selected="false" id="tab-prospects">Prospects</button>
+      <button class="tab" role="tab" data-act="tab" data-tab="scripts" aria-selected="false" id="tab-scripts">Scripts</button>
+      <button class="tab" role="tab" data-act="tab" data-tab="rules" aria-selected="false" id="tab-rules">Ground rules</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="panel" id="panel-today"></section>
+  <section class="panel" id="panel-prospects" hidden></section>
+  <section class="panel" id="panel-scripts" hidden></section>
+  <section class="panel" id="panel-rules" hidden></section>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- dates (all business dates are Africa/Johannesburg) ----------
+  const TZ = "Africa/Johannesburg";
+  const today = () => new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  const addDays = (d, n) => { const t = new Date(d + "T12:00:00Z"); t.setUTCDate(t.getUTCDate() + n); return t.toISOString().slice(0, 10); };
+  const fmtDate = (d) => d ? new Intl.DateTimeFormat("en-ZA", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(d + "T12:00:00Z")) : "";
+  let T = today();
+
+  // ---------- scripts ----------
+  // Placeholders: {first} {area} {openhouse} {slot1} {slot2}
+  const SITE = "custom-aisolutions.com";
+  const WEBINAR = "custom-aisolutions.com/hightech-hightouch-webinar";
+  const SCRIPTS = {
+    ai: {
+      ZA: {
+        opener: { name: "AI tools · first message (asks permission)", when: "Once, after you've followed and engaged", body:
+`Hi {first}, Steve Johnstone here. I've been enjoying your {area} posts.
+
+I build AI tools for South African agents through my company, Custom AI Solutions. Things like a show house check-in that ranks your visitors and writes the seller report for you, and buyer enquiries that arrive ranked with a reply already drafted.
+
+Would you like me to send you a short overview? If it's not for you, just say so and I won't raise it again.` },
+        yes: { name: "AI tools · after they say yes", when: "Only after a yes", body:
+`Thanks {first}. Here's the overview: ${SITE}
+
+Most agents start with the AI Show House Intelligence Hub or AI Buyer Match. I also run a free webinar, High Tech | High Touch, on using AI without losing the personal side of the business: ${WEBINAR}
+
+Happy to show you either one on a 15-minute call if that's easier. {slot1} or {slot2} work for me.` },
+      },
+      US: {
+        opener: { name: "AI tools · first message", when: "Once, after you've followed and engaged", body:
+`Hi {first}, Steve Johnstone here. I've been enjoying your posts about {area}.
+
+I build AI tools for agents at Custom AI Solutions: an open house check-in that ranks your visitors and drafts the seller report, and buyer inquiries that arrive ranked with a reply already written. Here's the overview if you're curious: ${SITE}
+
+Happy to give you a 15-minute walkthrough. And if it's not for you, no worries at all.` },
+        followup: { name: "AI tools · one follow-up", when: "7 days after the first message, once", body:
+`Hi {first}, floating this back up once in case it got buried. If a quick look at the open house or buyer-match tools would help, I'm happy to set it up. If not, I won't follow up again.` },
+        yes: { name: "AI tools · after they reply", when: "When they're interested", body:
+`Great, thanks {first}. Two times that work for me: {slot1} or {slot2}. I'll show you the tools on a real listing so you can see what your clients would see. The free webinar is here too if you'd rather start there: ${WEBINAR}` },
+      },
+    },
+    exp: {
+      ZA: {
+        opener: { name: "eXp · first message (asks permission)", when: "Once, only for non-eXp agents", body:
+`Hi {first}, Steve Johnstone from eXp South Africa. I've been following your work in {area} and like how you run your business.
+
+Now and then I compare notes with agents on how the eXp model works. No pressure at all. Would you be open to a 15-minute chat sometime? If not, all good, and I won't bring it up again.` },
+        yes: { name: "eXp · after they say yes", when: "Only after a yes", body:
+`Great, thanks {first}. {slot1} or {slot2} work for me. I'll walk you through how eXp works (the agent-owned side, the tools and the support) and you can ask me anything. No obligation either way.` },
+      },
+      US: {
+        opener: { name: "eXp · first message", when: "Once, only for non-eXp agents", body:
+`Hi {first}, Steve Johnstone with eXp Realty. I've been following your work in {area}.
+
+I like comparing notes with agents on how different brokerage models work. Would you be open to a 15-minute chat about how eXp operates? Zero pressure, and if it's not of interest just let me know.` },
+        followup: { name: "eXp · one follow-up", when: "7 days after the first message, once", body:
+`Hi {first}, just checking once more in case this got buried. Happy to compare notes on eXp whenever suits you. If it's not for you, I won't follow up again.` },
+        yes: { name: "eXp · after they reply", when: "When they're interested", body:
+`Thanks {first}. {slot1} or {slot2} work for me. I'll walk you through how eXp operates and answer anything you want to ask. No obligation.` },
+      },
+    },
+    connect: {
+      ZA: { name: "LinkedIn connection note", when: "With a connection request (no pitch)", body:
+`Hi {first}, I'm Steve. I work with agents across South Africa on AI and marketing, and I've been enjoying your {area} content. Would be good to connect.` },
+      US: { name: "LinkedIn connection note", when: "With a connection request (no pitch)", body:
+`Hi {first}, I'm Steve Johnstone. I work with agents on AI tools and have been enjoying your {area} content. Would be glad to connect.` },
+    },
+  };
+  const TRACK_LABEL = { ai: "AI tools", exp: "eXp recruiting" };
+
+  // Brands of the Cape Town agencies being approached about Nostoi. Agents at their Western Cape
+  // offices are flagged: recruiting them to eXp would cut against the neutrality promise.
+  const NOSTOI_BRANDS = ["pam golding", "seeff", "rawson", "re/max", "remax", "tyson", "lew geffen", "sotheby", "chas everitt", "greeff", "harcourts", "engel", "jawitz", "keller williams", "leapfrog", "dogon", "dg properties", "just property", "century 21", "cape coastal", "louw & coetzee", "fine & country", "knight frank", "realty 1", "realty1"];
+  const isNostoi = (p) => p.country === "ZA" && /western cape/i.test(p.region || "") && NOSTOI_BRANDS.some((b) => (p.brokerage + " " + (p.office || "")).toLowerCase().includes(b));
+
+  // ---------- state ----------
+  const S = {
+    db: null, sample: null, loaded: false, failed: "",
+    prospects: new Map(),
+    tab: "today",
+    filter: { q: "", country: "all", stage: "all" },
+    open: new Set(),
+    msg: {}, pick: {}, post: {}, imgs: {}, comments: {}, busy: {}, confirmDel: null,
+  };
+
+  // ---------- helpers ----------
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const slug = (s) => String(s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const safeUrl = (u) => /^https?:\/\//i.test(u || "") ? u : "";
+  const fill = (tpl, p) => tpl
+    .replaceAll("{first}", p.firstName || (p.name || "").split(" ")[0] || "there")
+    .replaceAll("{area}", p.area || p.city || (p.country === "US" ? "your market" : "your area"))
+    .replaceAll("{openhouse}", p.country === "US" ? "open house" : "show house");
+  const country = (p) => (p.country === "US" ? "US" : "ZA");
+  const tracks = (p) => ({ ai: p.tracks?.ai || "untried", exp: p.isExp ? "excluded" : (p.tracks?.exp || "untried") });
+  const eligibleTracks = (p) => {
+    const t = tracks(p);
+    // South Africa: one permission request per person in total (POPIA s69(2)).
+    if (country(p) === "ZA" && (["asked", "messaged", "declined", "no reply"].includes(t.ai) || ["asked", "messaged", "declined", "no reply"].includes(t.exp))) return [];
+    return ["ai", "exp"].filter((k) => t[k] === "untried");
+  };
+  const defaultTrack = (p) => {
+    const el = eligibleTracks(p);
+    if (p.suggestedTrack && el.includes(p.suggestedTrack)) return p.suggestedTrack;
+    if (el.includes("ai")) return "ai";
+    return el[0] || "ai";
+  };
+  const draftFor = (p, track) => {
+    const key = p.id + ":" + track;
+    if (S.msg[key] != null) return S.msg[key];
+    const d = p.drafts?.[track];
+    return d ? d : fill(SCRIPTS[track][country(p)].opener.body, p);
+  };
+
+  const STAGE_LABEL = { new: "New", following: "Following", engaged: "Engaged", messaged: "Messaged", talking: "In conversation", won: "Won", nurture: "Keep warm", closed: "Closed" };
+  const ACTIONS = {
+    reply: { order: 0, title: "They replied: your move", help: "They said yes or asked a question. Send the next message and book the call." },
+    talk: { order: 0.5, title: "Conversations to move forward", help: "You're talking. Where does it stand?" },
+    check: { order: 1, title: "Did they reply?", help: "Seven days since your message. Record what happened." },
+    followup: { order: 2, title: "Send the one follow-up", help: "US only. One short nudge, then you stop." },
+    message: { order: 3, title: "Send the first message", help: "You've followed and engaged. Send one message on one track." },
+    engage: { order: 4, title: "Comment on a recent post", help: "Open their profile, pick a recent post, and leave a real comment. Add a screenshot or paste the post to get a draft." },
+    follow: { order: 5, title: "Follow and like", help: "Follow them on each platform they're active on and like one or two recent posts. No messages yet." },
+  };
+
+  // ---------- writes ----------
+  function toast(msg) {
+    const el = document.getElementById("toast");
+    el.textContent = msg; el.hidden = false;
+    clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 2200);
+  }
+  async function save(id, patch, msg) {
+    if (!S.db) { toast("Can't save: open this page signed in to claude.ai."); return false; }
+    patch.updatedAt = new Date().toISOString();
+    try {
+      await S.db.doc("prospects/" + id).update(patch);
+      if (msg) toast(msg);
+      return true;
+    } catch (e) {
+      toast(e?.code === "invalid_argument" ? "You can view this desk but not change it." : "Couldn't save. Try again.");
+      return false;
+    }
+  }
+
+  function afterEngage(p) {
+    const comments = (p.touches?.comments || 0) + 1;
+    if (p.stage === "nurture") {
+      const second = country(p) === "US" && p.secondTrackFrom && T >= p.secondTrackFrom && eligibleTracks(p).length;
+      return { touches: { comments, lastEngaged: T }, nextAction: second ? "message" : "engage", nextDue: addDays(T, second ? 3 : 14) };
+    }
+    return { stage: "engaged", touches: { comments, lastEngaged: T }, nextAction: eligibleTracks(p).length ? "message" : "engage", nextDue: addDays(T, eligibleTracks(p).length ? 3 : 14) };
+  }
+
+  function outcome(p, v) {
+    const tr = p.activeTrack || defaultTrack(p);
+    const t = { ...tracks(p) };
+    if (v === "interested") { t[tr] = "interested"; return { stage: "talking", tracks: t, nextAction: "reply", nextDue: T }; }
+    if (v === "won") { t[tr] = "won"; return { stage: "won", tracks: t, nextAction: "none", nextDue: "" }; }
+    if (v === "optout") return { optOut: true, stage: "closed", nextAction: "none", nextDue: "" };
+    // declined, no reply, or a conversation that went cold: stop messaging this track, keep the relationship warm
+    t[tr] = v === "noreply" ? "no reply" : "declined";
+    const patch = { stage: "nurture", tracks: t, nextAction: "engage", nextDue: addDays(T, 14) };
+    if (country(p) === "US") patch.secondTrackFrom = addDays(T, 30);
+    return patch;
+  }
+
+  // ---------- rendering ----------
+  function linkRow(p) {
+    const L = p.links || {};
+    const order = [["instagram", "Instagram"], ["facebook", "Facebook"], ["linkedin", "LinkedIn"], ["youtube", "YouTube"], ["tiktok", "TikTok"], ["website", "Website"], ["profile", "Agency profile"]];
+    const items = order.filter(([k]) => safeUrl(L[k])).map(([k, n]) => `<a href="${esc(L[k])}" target="_blank" rel="noopener">${n}</a>`);
+    const q = encodeURIComponent(`${p.name} ${p.brokerage || ""}`.trim());
+    const qn = encodeURIComponent(p.name || "");
+    const finders = [
+      ["instagram", "Find on Instagram", `https://www.google.com/search?q=${encodeURIComponent(`site:instagram.com "${p.name}" ${p.brokerage || ""}`)}`],
+      ["facebook", "Find on Facebook", `https://www.facebook.com/search/top/?q=${q}`],
+      ["linkedin", "Find on LinkedIn", `https://www.linkedin.com/search/results/people/?keywords=${q}`],
+      ["youtube", "Find on YouTube", `https://www.youtube.com/results?search_query=${qn}`],
+    ].filter(([k]) => !safeUrl(L[k])).map(([, n, u]) => `<a href="${u}" target="_blank" rel="noopener" style="color:var(--muted)">${n}</a>`);
+    return `<div class="links">${items.join("")}${finders.join("")}</div>
+      <div class="row"><input type="url" data-addlink="${esc(p.id)}" placeholder="Found a profile? Paste its link and press Enter" aria-label="Add a profile link" style="flex:1;min-width:0"></div>`;
+  }
+  const PLAT_LABEL = { instagram: "Instagram", facebook: "Facebook", linkedin: "LinkedIn", youtube: "YouTube", tiktok: "TikTok", website: "Website" };
+  const platformOf = (u) => {
+    const h = (() => { try { return new URL(u).hostname.replace(/^www\.|^m\./, ""); } catch { return ""; } })();
+    if (h.endsWith("instagram.com")) return "instagram";
+    if (h.endsWith("facebook.com") || h === "fb.com") return "facebook";
+    if (h.endsWith("linkedin.com")) return "linkedin";
+    if (h.endsWith("youtube.com") || h === "youtu.be") return "youtube";
+    if (h.endsWith("tiktok.com")) return "tiktok";
+    return h ? "website" : "";
+  };
+  function chips(p) {
+    const c = [];
+    c.push(`<span class="chip c-plain">${esc(country(p))}</span>`);
+    if (p.isExp) c.push(`<span class="chip">eXp agent · AI tools only</span>`);
+    if (isNostoi(p)) c.push(`<span class="chip c-warn">Nostoi target agency</span>`);
+    if (p.optOut) c.push(`<span class="chip c-warn">Asked to stop</span>`);
+    if (p.nextDue && p.nextDue < T && p.nextAction !== "none") c.push(`<span class="chip c-due">Due ${esc(fmtDate(p.nextDue))}</span>`);
+    return `<div class="chips">${c.join("")}</div>`;
+  }
+  function head(p) {
+    const where = [p.area, p.city, p.region].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(", ");
+    const firm = [p.role, p.office || p.brokerage].filter(Boolean).join(" · ");
+    return `<div class="card-top"><div class="who"><h3>${esc(p.name)}</h3><div class="meta">${esc(firm)}${where ? " · " + esc(where) : ""}</div></div>${chips(p)}</div>
+      ${p.hook ? `<p class="hook">${esc(p.hook)}${safeUrl(p.hookSource) ? ` <a href="${esc(p.hookSource)}" target="_blank" rel="noopener">source</a>` : ""}</p>` : ""}`;
+  }
+  function skipBtn(p) { return `<button class="btn quiet" data-act="skip" data-id="${esc(p.id)}">Tomorrow</button>`; }
+
+  function commentBlock(p) {
+    const c = S.comments[p.id] || {};
+    if (!S.sample) return `<p class="note">Drafting needs this page to have Claude access. Write the comment yourself: about their post, no pitch, no links.</p>`;
+    const opts = (c.options || []).map((o, i) => `<div class="opt"><p id="cm-${esc(p.id)}-${i}">${esc(o)}</p><button class="btn" data-act="copy" data-target="cm-${esc(p.id)}-${i}">Copy</button></div>`).join("");
+    const n = (S.imgs[p.id] || []).length;
+    return `<div class="drop">
+        <label class="f">Paste the post text, or add a screenshot of it
+          <textarea class="short" data-post="${esc(p.id)}" placeholder="Paste the caption here. You can also paste a screenshot straight into this box.">${esc(S.post[p.id] || "")}</textarea></label>
+        <div class="row"><input type="file" accept="image/png,image/jpeg,image/webp" data-img="${esc(p.id)}" aria-label="Screenshot of the post">${n ? `<span class="note">${n} screenshot${n > 1 ? "s" : ""} ready</span>` : ""}</div>
+        <div class="row"><button class="btn" data-act="draft-comment" data-id="${esc(p.id)}" ${c.busy ? "disabled" : ""}>${c.busy ? "Drafting…" : "Draft comment options"}</button>${c.err ? `<span class="note warn">${esc(c.err)}</span>` : ""}</div>
+        ${opts ? `<div class="drafts">${opts}</div>` : ""}
+      </div>`;
+  }
+
+  function messageBlock(p, mode) {
+    const el = eligibleTracks(p);
+    const track = mode === "message" ? (S.pick[p.id] || defaultTrack(p)) : (p.activeTrack || defaultTrack(p));
+    const c = country(p);
+    let body;
+    const key = p.id + ":" + track + ":" + mode;
+    if (mode === "message") body = S.msg[key] ?? draftFor(p, track);
+    else if (mode === "followup") body = S.msg[key] ?? fill((SCRIPTS[track][c].followup || SCRIPTS[track][c].opener).body, p);
+    else body = S.msg[key] ?? fill(SCRIPTS[track][c].yes.body, p);
+    const sel = mode === "message" ? `<label class="f">Track
+        <select data-pick="${esc(p.id)}">${["ai", "exp"].map((k) => {
+          const ok = el.includes(k);
+          const why = !ok ? (k === "exp" && p.isExp ? " (already at eXp)" : " (used)") : (k === "exp" && isNostoi(p) ? " (Nostoi agency: think twice)" : "");
+          return `<option value="${k}" ${k === track ? "selected" : ""} ${ok ? "" : "disabled"}>${TRACK_LABEL[k]}${why}</option>`;
+        }).join("")}</select></label>` : `<p class="note">Track: ${TRACK_LABEL[track]}</p>`;
+    const warn = mode === "message" && track === "exp" && isNostoi(p) ? `<p class="note warn">This agent's agency is on the Nostoi list. Recruiting its agents to eXp undercuts the neutrality promise you're making to its principal.</p>` : "";
+    const zaNote = mode === "message" && c === "ZA" ? `<p class="note">South Africa: this is your one permission message for this person. If they don't answer yes, no more sales messages.</p>` : "";
+    const id = `msg-${slug(p.id)}-${mode}`;
+    const busy = S.busy[key];
+    return `${sel}${warn}${zaNote}
+      <textarea id="${id}" data-msg="${esc(key)}">${esc(body)}</textarea>
+      <div class="row">
+        <button class="btn" data-act="copy" data-target="${id}">Copy</button>
+        ${S.sample && mode === "message" ? `<button class="btn" data-act="personalise" data-id="${esc(p.id)}" data-track="${track}" data-key="${esc(key)}" ${busy ? "disabled" : ""}>${busy ? "Rewriting…" : "Personalise with Claude"}</button>` : ""}
+        ${mode === "message" ? `<button class="btn primary" data-act="sent" data-id="${esc(p.id)}" data-track="${track}">I sent it</button>` : ""}
+        ${mode === "followup" ? `<button class="btn primary" data-act="followup-sent" data-id="${esc(p.id)}">I sent it</button><button class="btn" data-act="outcome" data-v="interested" data-id="${esc(p.id)}">They already replied</button>` : ""}
+        ${mode === "reply" ? `<button class="btn primary" data-act="replied" data-id="${esc(p.id)}">Sent, waiting on them</button><button class="btn" data-act="outcome" data-v="won" data-id="${esc(p.id)}">Signed up / joined</button><button class="btn" data-act="outcome" data-v="declined" data-id="${esc(p.id)}">Went cold</button>` : ""}
+        ${skipBtn(p)}
+      </div>`;
+  }
+
+  function actionBody(p) {
+    const a = p.nextAction;
+    if (a === "follow") {
+      const L = p.links || {};
+      const plats = ["instagram", "facebook", "linkedin", "youtube", "tiktok"].filter((k) => safeUrl(L[k]));
+      const f = p.touches?.followed || {};
+      const toggles = plats.map((k) => `<button class="plat" data-act="followed" data-id="${esc(p.id)}" data-plat="${k}" aria-pressed="${f[k] ? "true" : "false"}">${PLAT_LABEL[k]}</button>`).join("");
+      const li = safeUrl(L.linkedin) ? `<details><summary class="note">LinkedIn connection note</summary><textarea id="cn-${slug(p.id)}" class="short">${esc(fill(SCRIPTS.connect[country(p)].body, p))}</textarea><button class="btn" data-act="copy" data-target="cn-${slug(p.id)}">Copy</button></details>` : "";
+      return `${linkRow(p)}${plats.length ? `<p class="step">Tap each platform once you've followed:</p><div class="row">${toggles}</div>` : ""}${li}
+        <div class="row"><button class="btn primary" data-act="follow-done" data-id="${esc(p.id)}">Done: followed and liked</button>${skipBtn(p)}</div>`;
+    }
+    if (a === "engage") return `${linkRow(p)}${commentBlock(p)}
+        <div class="row"><button class="btn primary" data-act="engage-done" data-id="${esc(p.id)}">I commented</button>${skipBtn(p)}</div>`;
+    if (a === "message") return `${linkRow(p)}${messageBlock(p, "message")}`;
+    if (a === "followup") return messageBlock(p, "followup");
+    if (a === "reply") return messageBlock(p, "reply");
+    if (a === "talk") return `<p class="step">Last reply ${esc(fmtDate(p.touches?.lastReplyOn))} · ${TRACK_LABEL[p.activeTrack || "ai"]}${p.notes ? " · " + esc(p.notes.slice(0, 140)) : ""}</p>
+        <div class="row">
+          <button class="btn" data-act="still-talking" data-id="${esc(p.id)}">Still talking: check in a week</button>
+          <button class="btn primary" data-act="outcome" data-v="won" data-id="${esc(p.id)}">Signed up / joined</button>
+          <button class="btn" data-act="outcome" data-v="declined" data-id="${esc(p.id)}">Went cold</button>
+          ${skipBtn(p)}
+        </div>`;
+    if (a === "check") return `<p class="step">You messaged them on ${esc(fmtDate(p.touches?.messagedOn))} about ${TRACK_LABEL[p.activeTrack || "ai"]}.</p>
+        <div class="row">
+          <button class="btn primary" data-act="outcome" data-v="interested" data-id="${esc(p.id)}">Interested</button>
+          <button class="btn" data-act="outcome" data-v="noreply" data-id="${esc(p.id)}">No reply</button>
+          <button class="btn" data-act="outcome" data-v="declined" data-id="${esc(p.id)}">Not interested</button>
+          <button class="btn danger" data-act="outcome" data-v="optout" data-id="${esc(p.id)}">Asked me to stop</button>
+          ${skipBtn(p)}
+        </div>`;
+    return "";
+  }
+
+  function renderStats() {
+    const all = [...S.prospects.values()];
+    const due = all.filter((p) => p.nextAction && p.nextAction !== "none" && p.nextDue && p.nextDue <= T).length;
+    const talking = all.filter((p) => p.stage === "talking").length;
+    const won = all.filter((p) => p.stage === "won").length;
+    const za = all.filter((p) => country(p) === "ZA").length;
+    document.getElementById("stats").innerHTML = S.loaded
+      ? `<span class="hot"><b>${due}</b> due today</span><span><b>${all.length}</b> prospects (${za} SA · ${all.length - za} US)</span><span><b>${talking}</b> in conversation</span><span><b>${won}</b> won</span>`
+      : `<span>${esc(S.failed || "Loading your prospects…")}</span>`;
+  }
+
+  function renderToday() {
+    const el = document.getElementById("panel-today");
+    if (!S.loaded) { el.innerHTML = `<div class="empty"><strong>${S.failed ? "Your prospects can't load here." : "Loading…"}</strong>${S.failed ? `<span>${esc(S.failed)}</span>` : ""}</div>`; return; }
+    const due = [...S.prospects.values()].filter((p) => !p.optOut && ACTIONS[p.nextAction] && p.nextDue && p.nextDue <= T);
+    if (!due.length) {
+      const any = S.prospects.size;
+      el.innerHTML = `<div class="empty"><strong>${any ? "Nothing due today." : "No agents yet."}</strong><span>${any ? "Everything's done for today. New agents arrive with the weekday morning research run." : "The weekday morning research run adds about ten agents a day. You can also add someone yourself under Prospects."}</span></div>`;
+      return;
+    }
+    const groups = {};
+    due.forEach((p) => (groups[p.nextAction] ||= []).push(p));
+    el.innerHTML = Object.keys(groups).sort((a, b) => ACTIONS[a].order - ACTIONS[b].order).map((a) => {
+      const list = groups[a].sort((x, y) => (x.nextDue || "").localeCompare(y.nextDue || "") || x.name.localeCompare(y.name));
+      return `<div class="group"><div class="group-head"><h2>${ACTIONS[a].title}</h2><span class="count">${list.length}</span><p>${ACTIONS[a].help}</p></div>
+        ${list.map((p) => `<article class="card">${head(p)}${actionBody(p)}</article>`).join("")}</div>`;
+    }).join("");
+  }
+
+  function renderProspects() {
+    const el = document.getElementById("panel-prospects");
+    const f = S.filter;
+    const all = [...S.prospects.values()].sort((a, b) => a.name.localeCompare(b.name));
+    const q = f.q.trim().toLowerCase();
+    const list = all.filter((p) =>
+      (f.country === "all" || country(p) === f.country) &&
+      (f.stage === "all" || (p.stage || "new") === f.stage) &&
+      (!q || [p.name, p.brokerage, p.office, p.city, p.area, p.region].join(" ").toLowerCase().includes(q)));
+    const rows = list.slice(0, 300).map((p) => {
+      const open = S.open.has(p.id);
+      const t = tracks(p);
+      const next = p.optOut ? "stopped" : (ACTIONS[p.nextAction] ? `${p.nextAction} · ${fmtDate(p.nextDue)}` : STAGE_LABEL[p.stage] || "");
+      return `<div class="prow"><button data-act="expand" data-id="${esc(p.id)}" aria-expanded="${open}">
+          <span class="nm">${esc(p.name)}</span><span class="st">${esc(STAGE_LABEL[p.stage || "new"] || "")}</span>
+          <span class="ds">${esc([p.office || p.brokerage, p.area || p.city, country(p)].filter(Boolean).join(" · "))} · next: ${esc(next)}</span></button>
+        ${open ? `<div class="pdetail">${chips(p)}${linkRow(p)}
+          <dl class="kv">
+            ${p.specialty ? `<dt>Focus</dt><dd>${esc(p.specialty)}</dd>` : ""}
+            ${p.hook ? `<dt>Hook</dt><dd>${esc(p.hook)}</dd>` : ""}
+            <dt>AI tools</dt><dd>${esc(t.ai)}</dd><dt>eXp</dt><dd>${esc(t.exp)}</dd>
+            <dt>Followed</dt><dd>${esc(Object.keys(p.touches?.followed || {}).join(", ") || "not yet")}</dd>
+            <dt>Comments</dt><dd>${p.touches?.comments || 0}${p.touches?.lastEngaged ? " · last " + esc(fmtDate(p.touches.lastEngaged)) : ""}</dd>
+            ${p.touches?.messagedOn ? `<dt>Messaged</dt><dd>${esc(fmtDate(p.touches.messagedOn))} (${esc(TRACK_LABEL[p.activeTrack] || "")})</dd>` : ""}
+            <dt>Added</dt><dd>${esc(fmtDate(p.addedOn))}${p.confidence ? " · research confidence " + esc(p.confidence) : ""}</dd>
+            ${(p.sources || []).filter(safeUrl).length ? `<dt>Sources</dt><dd>${p.sources.filter(safeUrl).map((s, i) => `<a href="${esc(s)}" target="_blank" rel="noopener">${i + 1}</a>`).join(" ")}</dd>` : ""}
+          </dl>
+          <label class="f">Notes<textarea class="short" data-notes="${esc(p.id)}" placeholder="What you talked about, what they need">${esc(p.notes || "")}</textarea></label>
+          <div class="row">
+            <button class="btn" data-act="outcome" data-v="interested" data-id="${esc(p.id)}">Interested</button>
+            <button class="btn" data-act="outcome" data-v="won" data-id="${esc(p.id)}">Won</button>
+            <button class="btn" data-act="outcome" data-v="declined" data-id="${esc(p.id)}">Not interested</button>
+            <button class="btn danger" data-act="outcome" data-v="optout" data-id="${esc(p.id)}">Asked to stop</button>
+            <button class="btn quiet" data-act="restart" data-id="${esc(p.id)}">Put back in Today</button>
+            ${S.confirmDel === p.id ? `<button class="btn danger" data-act="delete-yes" data-id="${esc(p.id)}">Confirm delete</button><button class="btn quiet" data-act="delete-no">Cancel</button>` : `<button class="btn quiet" data-act="delete" data-id="${esc(p.id)}">Delete</button>`}
+          </div></div>` : ""}</div>`;
+    }).join("");
+    el.innerHTML = `
+      <div class="filters">
+        <input class="q" type="search" id="f-q" placeholder="Search name, agency or area" value="${esc(f.q)}" aria-label="Search">
+        <select id="f-country" aria-label="Country"><option value="all">SA and US</option><option value="ZA" ${f.country === "ZA" ? "selected" : ""}>South Africa</option><option value="US" ${f.country === "US" ? "selected" : ""}>United States</option></select>
+        <select id="f-stage" aria-label="Stage"><option value="all">Any stage</option>${Object.entries(STAGE_LABEL).map(([k, v]) => `<option value="${k}" ${f.stage === k ? "selected" : ""}>${v}</option>`).join("")}</select>
+      </div>
+      <p class="note">${list.length} of ${all.length} shown${list.length > 300 ? " (first 300)" : ""}.</p>
+      <div class="plist">${rows || `<div class="empty"><strong>No matches.</strong></div>`}</div>
+      <details><summary class="btn">Add an agent yourself</summary>
+        <form class="addform" id="addform" style="margin-top:10px">
+          <label class="f full">Full name<input type="text" id="a-name" required></label>
+          <label class="f">Brokerage<input type="text" id="a-brokerage" required placeholder="e.g. Seeff, Keller Williams"></label>
+          <label class="f">Office or team<input type="text" id="a-office"></label>
+          <label class="f">Country<select id="a-country"><option value="ZA">South Africa</option><option value="US">United States</option></select></label>
+          <label class="f">Province or state<input type="text" id="a-region" placeholder="Gauteng, Texas"></label>
+          <label class="f">City<input type="text" id="a-city"></label>
+          <label class="f">Area they focus on<input type="text" id="a-area"></label>
+          <label class="f">Instagram URL<input type="url" id="a-instagram"></label>
+          <label class="f">Facebook URL<input type="url" id="a-facebook"></label>
+          <label class="f">LinkedIn URL<input type="url" id="a-linkedin"></label>
+          <label class="f">YouTube URL<input type="url" id="a-youtube"></label>
+          <label class="f full" style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="a-exp"> Already at eXp (AI tools only)</label>
+          <div class="row full"><button class="btn primary" type="submit">Add to Today</button></div>
+        </form></details>`;
+  }
+
+  function renderScripts() {
+    const el = document.getElementById("panel-scripts");
+    const block = (s, id) => `<div class="script"><h3>${esc(s.name)}</h3><span class="when">${esc(s.when)}</span><pre id="${id}">${esc(s.body)}</pre><div class="row"><button class="btn" data-act="copy" data-target="${id}">Copy</button></div></div>`;
+    const sec = (title, note, items) => `<div class="group"><div class="group-head"><h2>${title}</h2><p>${note}</p></div><div class="cols">${items.join("")}</div></div>`;
+    el.innerHTML =
+      `<p class="note">These are the base scripts. Cards on Today fill in the agent's name and area; the morning run writes a personalised version from each agent's hook. Placeholders like {slot1} are for you to fill.</p>` +
+      sec("AI tools · South Africa", "Permission first. One message, then only continue if they say yes.", [block(SCRIPTS.ai.ZA.opener, "s1"), block(SCRIPTS.ai.ZA.yes, "s2")]) +
+      sec("AI tools · United States", "One message and one follow-up, then stop.", [block(SCRIPTS.ai.US.opener, "s3"), block(SCRIPTS.ai.US.followup, "s4"), block(SCRIPTS.ai.US.yes, "s5")]) +
+      sec("eXp recruiting · South Africa", "Never for agents already at eXp. Permission first.", [block(SCRIPTS.exp.ZA.opener, "s6"), block(SCRIPTS.exp.ZA.yes, "s7")]) +
+      sec("eXp recruiting · United States", "Never for agents already at eXp. No income or revenue-share figures.", [block(SCRIPTS.exp.US.opener, "s8"), block(SCRIPTS.exp.US.followup, "s9"), block(SCRIPTS.exp.US.yes, "s10")]) +
+      sec("Connection notes", "For LinkedIn requests. No pitch in the note.", [block(SCRIPTS.connect.ZA, "s11"), block(SCRIPTS.connect.US, "s12")]);
+  }
+
+  function renderRules() {
+    document.getElementById("panel-rules").innerHTML = `<div class="rules">
+      <div class="rule"><h3>You press send</h3><p>This desk never logs in to Facebook, Instagram, LinkedIn or YouTube and never posts anything. It finds agents, drafts, and keeps score. Every follow, like, comment and message is yours, sent from your own phone. That keeps your accounts inside each platform's rules.</p></div>
+      <div class="rule"><h3>Keep a human pace</h3><ul>
+        <li>About 10 to 15 new people a day, spread through the day, not all in one sitting.</li>
+        <li>LinkedIn caps connection requests at roughly 100 a week, and free accounts get only a few personalised notes a month. Most requests can go without a note.</li>
+        <li>Comment only when you have something real to say about the post. No pitches, links or hashtags in comments.</li></ul></div>
+      <div class="rule"><h3>South Africa: one permission message (POPIA section 69)</h3><p>Sales messages to people who haven't agreed to them are restricted. You may approach someone once to ask whether they'd like to hear more. So each South African agent gets one first message, on one track, with an easy way to say no. If they say yes, carry on. If they say no or don't answer within a week, stop sales messages; you can keep liking and commenting. If anyone asks you to stop, tap "Asked me to stop" and the desk drops them for good. This is a summary, not legal advice.</p></div>
+      <div class="rule"><h3>United States: one message, one follow-up</h3><p>One first message, one follow-up a week later, then stop. Thirty days after a no or no reply, the desk may suggest the other track once, after you've engaged with them again.</p></div>
+      <div class="rule"><h3>One track at a time</h3><ul>
+        <li>Agents already at eXp only ever see the AI tools track.</li>
+        <li>Lead with AI tools by default. It gives them something useful before you ask for anything.</li>
+        <li>eXp messages carry no income or revenue-share figures. Point people to eXp's official material for numbers.</li></ul></div>
+      <div class="rule"><h3>Nostoi agencies</h3><p>Agents at the Cape Town offices of agencies you're approaching about Nostoi carry a red tag. Your Nostoi pitch promises neutrality and, per the legal opinions, no use of Nostoi data for eXp recruiting. Recruiting those agencies' agents to eXp at the same time would cut against that. The desk still lets you choose, and warns you when you do.</p></div>
+    </div>`;
+  }
+
+  function render() {
+    T = today();
+    document.getElementById("today-label").textContent = new Intl.DateTimeFormat("en-ZA", { weekday: "long", day: "numeric", month: "long", timeZone: TZ }).format(new Date());
+    renderStats();
+    if (S.tab === "today") renderToday();
+    if (S.tab === "prospects") renderProspects();
+  }
+
+  // ---------- Claude drafting ----------
+  function sampleErr(code) {
+    return ({
+      not_granted: "Claude drafting is switched off for this page. You can still write it yourself.",
+      sampling_disabled: "Claude drafting isn't available on this account.",
+      rate_limited: "Too many requests just now. Try again in a minute.",
+      invalid_json: "The draft came back in an odd shape. Try again.",
+      refused: "Claude declined this one. Try different post text.",
+      image_rejected: "That image couldn't be used. Try a PNG or JPG screenshot.",
+      images_unavailable: "Screenshots can't be sent from this view. Paste the text instead.",
+      session_expired: "Sign in to claude.ai again, then retry.",
+    })[code] || "Couldn't draft that. Try again.";
+  }
+  async function draftComment(id) {
+    const p = S.prospects.get(id); if (!p || !S.sample) return;
+    const text = (S.post[id] || "").trim(); const imgs = S.imgs[id] || [];
+    if (!text && !imgs.length) { S.comments[id] = { err: "Paste the post text or add a screenshot first." }; render(); return; }
+    S.comments[id] = { busy: true }; render();
+    const english = country(p) === "ZA" ? "South African English" : "American English";
+    const prompt = `Steve Johnstone is a real estate professional who wants to leave a genuine comment on a post by ${p.name}, an agent at ${p.brokerage} in ${p.area || p.city || p.region}. ${imgs.length ? "The attached image is a screenshot of the post." : ""}
+${text ? `Post text:\n"""${text.slice(0, 4000)}"""` : ""}
+
+Write 3 different comment options. Rules: respond to something specific in this post; 1 or 2 sentences; warm and natural, like a fellow agent; ${english}; no selling, no links, no hashtags, never mention AI tools, Custom AI Solutions or eXp; at most one emoji and only if it fits; no generic praise like "Great post!".
+Reply with only a JSON array of 3 strings.`;
+    try {
+      const opts = { modelTier: "default", cache: false };
+      if (imgs.length) opts.images = imgs;
+      const out = await S.sample.json(prompt, opts);
+      const list = Array.isArray(out) ? out.map(String).filter(Boolean).slice(0, 3) : [];
+      S.comments[id] = list.length ? { options: list } : { err: "No usable drafts came back. Try again." };
+    } catch (e) { S.comments[id] = { err: sampleErr(e?.code) }; }
+    render();
+  }
+  async function personalise(id, track, key) {
+    const p = S.prospects.get(id); if (!p || !S.sample) return;
+    const current = document.querySelector(`[data-msg="${CSS.escape(key)}"]`)?.value || draftFor(p, track);
+    S.busy[key] = true; render();
+    const prompt = `Lightly personalise this direct message from Steve Johnstone to ${p.name} (${p.role || "agent"} at ${p.office || p.brokerage}, ${p.area || p.city || ""}, ${p.region || ""}).
+${p.hook ? `Public fact about them you can reference naturally in the first line: "${p.hook}".` : ""}${p.specialty ? ` Their focus: ${p.specialty}.` : ""}
+
+Rules: keep the structure, the offer and the final sentence that gives them an easy no; stay under 600 characters; ${country(p) === "ZA" ? "South African English" : "American English"}; no emojis, hashtags or exclamation marks; no income, earnings or revenue-share claims; don't invent facts about them beyond what's given here.
+Reply with the message text only.
+
+Message:
+"""${current}"""`;
+    try {
+      const { text } = await S.sample(prompt, { modelTier: "default", cache: false });
+      S.msg[key] = text.trim().replace(/^"""|"""$/g, "").trim();
+    } catch (e) { toast(sampleErr(e?.code)); }
+    S.busy[key] = false; render();
+  }
+
+  // ---------- events ----------
+  async function copyFrom(targetId) {
+    const el = document.getElementById(targetId); if (!el) return;
+    const text = "value" in el && el.tagName !== "PRE" && el.tagName !== "P" ? el.value : el.textContent;
+    try { await navigator.clipboard.writeText(text); toast("Copied"); }
+    catch {
+      if (el.select) { el.focus(); el.select(); }
+      else { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+      toast("Selected: copy it from here");
+    }
+  }
+
+  document.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-act]"); if (!b) return;
+    const act = b.dataset.act, id = b.dataset.id, p = id ? S.prospects.get(id) : null;
+    if (act === "tab") {
+      S.tab = b.dataset.tab;
+      document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t.dataset.tab === S.tab ? "true" : "false"));
+      ["today", "prospects", "scripts", "rules"].forEach((k) => { document.getElementById("panel-" + k).hidden = k !== S.tab; });
+      try { localStorage.setItem("desk-tab", S.tab); } catch {}
+      render(); return;
+    }
+    if (act === "copy") { copyFrom(b.dataset.target); return; }
+    if (act === "expand") { S.open.has(id) ? S.open.delete(id) : S.open.add(id); S.confirmDel = null; renderProspects(); return; }
+    if (act === "delete") { S.confirmDel = id; renderProspects(); return; }
+    if (act === "delete-no") { S.confirmDel = null; renderProspects(); return; }
+    if (act === "delete-yes" && S.db) { try { await S.db.doc("prospects/" + id).delete(); S.open.delete(id); toast("Deleted"); } catch { toast("Couldn't delete. Try again."); } S.confirmDel = null; return; }
+    if (act === "draft-comment") { draftComment(id); return; }
+    if (act === "personalise") { personalise(id, b.dataset.track, b.dataset.key); return; }
+    if (!p) return;
+    if (act === "skip") { save(p.id, { nextDue: addDays(T, 1) }, "Moved to tomorrow"); return; }
+    if (act === "followed") {
+      const k = b.dataset.plat; const on = !(p.touches?.followed || {})[k];
+      save(p.id, { touches: { followed: { [k]: on ? T : { __delete__: true } } } });
+      return;
+    }
+    if (act === "follow-done") { save(p.id, { stage: "following", touches: { followedOn: T }, nextAction: "engage", nextDue: addDays(T, 2) }, "Nice. Comment due in 2 days"); return; }
+    if (act === "engage-done") { delete S.comments[p.id]; delete S.post[p.id]; delete S.imgs[p.id]; save(p.id, afterEngage(p), "Logged"); return; }
+    if (act === "sent") {
+      const track = b.dataset.track;
+      const t = { ...tracks(p) }; t[track] = country(p) === "ZA" ? "asked" : "messaged";
+      const next = country(p) === "US" ? { nextAction: "followup", nextDue: addDays(T, 7) } : { nextAction: "check", nextDue: addDays(T, 7) };
+      save(p.id, { stage: "messaged", activeTrack: track, tracks: t, touches: { messagedOn: T }, ...next }, "Logged. Check back in 7 days");
+      return;
+    }
+    if (act === "followup-sent") { save(p.id, { touches: { followupOn: T }, nextAction: "check", nextDue: addDays(T, 7) }, "Logged"); return; }
+    if (act === "replied") { save(p.id, { nextAction: "talk", nextDue: addDays(T, 5), touches: { lastReplyOn: T } }, "Logged. Back in Today in 5 days"); return; }
+    if (act === "still-talking") { save(p.id, { nextAction: "talk", nextDue: addDays(T, 7) }, "Check again in a week"); return; }
+    if (act === "outcome") { save(p.id, outcome(p, b.dataset.v), "Updated"); return; }
+    if (act === "restart") { save(p.id, { optOut: false, nextAction: p.touches?.followedOn ? "engage" : "follow", nextDue: T, stage: p.stage === "closed" ? "nurture" : (p.stage || "new") }, "Back in Today"); return; }
+  });
+
+  document.addEventListener("input", (e) => {
+    const t = e.target;
+    if (t.dataset.msg) S.msg[t.dataset.msg] = t.value;
+    if (t.dataset.post) S.post[t.dataset.post] = t.value;
+    if (t.id === "f-q") { S.filter.q = t.value; const pos = t.selectionStart; renderProspects(); const n = document.getElementById("f-q"); n.focus(); try { n.setSelectionRange(pos, pos); } catch {} }
+  });
+  document.addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.dataset.pick) { S.pick[t.dataset.pick] = t.value; render(); }
+    if (t.id === "f-country") { S.filter.country = t.value; renderProspects(); }
+    if (t.id === "f-stage") { S.filter.stage = t.value; renderProspects(); }
+    if (t.dataset.img) { S.imgs[t.dataset.img] = [...t.files].slice(0, 3); render(); }
+    if (t.dataset.notes) { const p = S.prospects.get(t.dataset.notes); if (p && (p.notes || "") !== t.value) save(p.id, { notes: t.value }, "Notes saved"); }
+  });
+  document.addEventListener("keydown", (e) => {
+    const t = e.target;
+    if (e.key !== "Enter" || !t.dataset?.addlink) return;
+    e.preventDefault();
+    const u = t.value.trim(), k = platformOf(u);
+    if (!safeUrl(u) || !k) { toast("Paste a full link starting with https://"); return; }
+    save(t.dataset.addlink, { links: { [k]: u } }, `${PLAT_LABEL[k]} link saved`);
+    t.value = "";
+  });
+  document.addEventListener("paste", (e) => {
+    const t = e.target; if (!t.dataset?.post) return;
+    const files = [...(e.clipboardData?.files || [])].filter((f) => f.type.startsWith("image/"));
+    if (files.length) { e.preventDefault(); S.imgs[t.dataset.post] = files.slice(0, 3); render(); }
+  });
+  document.addEventListener("submit", async (e) => {
+    if (e.target.id !== "addform") return;
+    e.preventDefault();
+    if (!S.db) { toast("Can't save: open this page signed in to claude.ai."); return; }
+    const v = (k) => (document.getElementById("a-" + k)?.value || "").trim();
+    const name = v("name"), brokerage = v("brokerage"), c = v("country") || "ZA";
+    if (!name || !brokerage) { toast("Add a name and a brokerage."); return; }
+    const isExp = document.getElementById("a-exp").checked || /\bexp\b/i.test(brokerage);
+    const links = {}; ["instagram", "facebook", "linkedin", "youtube"].forEach((k) => { if (safeUrl(v(k))) links[k] = v(k); });
+    const id = `${c.toLowerCase()}-${slug(name)}-${slug(brokerage).split("-")[0]}-${Math.random().toString(36).slice(2, 6)}`;
+    const doc = { id, name, firstName: name.split(" ")[0], country: c, region: v("region"), city: v("city"), area: v("area"), brokerage, office: v("office"), isExp, links,
+      stage: "new", tracks: { ai: "untried", exp: isExp ? "excluded" : "untried" }, touches: {}, nextAction: "follow", nextDue: T, addedOn: T, source: "manual", updatedAt: new Date().toISOString() };
+    try { await S.db.doc("prospects/" + id).set(doc); e.target.reset(); toast("Added to Today"); } catch { toast("Couldn't add. Try again."); }
+  });
+
+  // ---------- boot ----------
+  try { const t = localStorage.getItem("desk-tab"); if (t && ["today", "prospects", "scripts", "rules"].includes(t)) document.getElementById("tab-" + t).click(); } catch {}
+  renderScripts(); renderRules(); render();
+
+  (async () => {
+    const [db, sample] = await Promise.all([
+      window.claude?.use ? window.claude.use("db").catch(() => null) : null,
+      window.claude?.use ? window.claude.use("sample").catch(() => null) : null,
+    ]);
+    S.sample = sample;
+    if (!db) { S.failed = "Open this desk on claude.ai, signed in, to load your prospects."; render(); return; }
+    S.db = db;
+    db.collection("prospects").limit(1000).onSnapshot((snap) => {
+      const m = new Map();
+      snap.docs.forEach((d) => { const x = d.data(); if (x && x.name) m.set(d.id, { ...x, id: d.id }); });
+      S.prospects = m; S.loaded = true; render();
+    }, (err) => { S.failed = err?.code === "revoked" ? "Access to this desk changed. Reload the page." : "Couldn't load prospects. Reload to try again."; S.loaded = false; render(); });
+    setInterval(() => { if (today() !== T) render(); }, 60000);
+  })();
+})();
+</script>

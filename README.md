@@ -12,3 +12,6 @@ The working page lives in the Custom AI Solutions site repo
 
 Research date: 29 September 2026. Agent counts are Private Property branch counts or ranges;
 the confidence field on each record says how firm the figure is.
+
+- `social-outreach/` holds the Agent Outreach Desk: a private claude.ai page for hand-sent social
+  outreach to estate agents in South Africa and Austin. Its prospect records stay in the page, not here.
